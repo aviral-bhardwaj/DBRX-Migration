@@ -1,6 +1,16 @@
 # outputs.tf (root)
 # Surfaces the most important resource IDs / URLs after a successful apply.
 
+output "service_principal_id" {
+  description = "Internal Databricks ID of the service principal (empty if SP not configured)."
+  value       = length(module.service_principal) > 0 ? module.service_principal[0].service_principal_id : null
+}
+
+output "service_principal_application_id" {
+  description = "Application (Client) ID of the service principal — use as client_id in terraform.tfvars."
+  value       = length(module.service_principal) > 0 ? module.service_principal[0].application_id : null
+}
+
 output "cluster_id" {
   description = "ID of the all-purpose interactive cluster."
   value       = module.clusters.cluster_id

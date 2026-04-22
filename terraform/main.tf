@@ -1,11 +1,29 @@
 # main.tf (root)
 # Orchestrates all sub-modules and wires their outputs together.
 # Apply order (implicit through depends_on + output references):
-#   policies → instance_pools → clusters → notebooks → jobs
-#                             ↘ unity_catalog → dlt_pipeline
-#                             ↘ sql_warehouse → dashboards
-#                             ↘ secret_scope
-#                             ↘ permissions
+#   service_principal → policies → instance_pools → clusters → notebooks → jobs
+#                                ↘ unity_catalog → dlt_pipeline
+#                                ↘ sql_warehouse → dashboards
+#                                ↘ secret_scope
+#                                ↘ permissions
+
+# ---------------------------------------------------------------------------
+# 0. Service Principal
+# Registers the SP in the workspace and (optionally) adds it to the admin group.
+# Skip this block on first-ever apply when the admins group doesn't yet exist
+# by setting service_principal_application_id = "" in terraform.tfvars.
+# ---------------------------------------------------------------------------
+module "service_principal" {
+  source = "./modules/service_principal"
+
+  # Only create the SP resource when an application_id is provided
+  count = var.service_principal_application_id != "" ? 1 : 0
+
+  application_id   = var.service_principal_application_id
+  display_name     = var.service_principal_display_name
+  admin_group_name = var.admin_group_name
+  create_token     = var.service_principal_create_token
+}
 
 # ---------------------------------------------------------------------------
 # 1. Cluster policies

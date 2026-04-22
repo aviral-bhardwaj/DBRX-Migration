@@ -1,10 +1,51 @@
 # terraform.tfvars.example
-# Copy this file to terraform.tfvars, fill in real values, and keep it out of source
-# control (it is listed in .gitignore).
+# Copy this file to terraform.tfvars, fill in real values, and keep it out of
+# source control (terraform.tfvars is listed in .gitignore).
+#
+# ============================================================
+# AUTHENTICATION — choose ONE of the two modes below
+# ============================================================
 
-databricks_host  = "https://dbc-bd6bd71d-fa92.cloud.databricks.com"
+# ------------------------------------------------------------
+# MODE A — Personal Access Token (PAT)
+# Use this for interactive / developer runs from your laptop.
+# Generate a token: Databricks UI → Settings → Developer → Access Tokens
+# ------------------------------------------------------------
+auth_type        = "pat"
 databricks_token = "dapi<YOUR_PERSONAL_ACCESS_TOKEN>"
+# Leave service-principal fields empty when using Mode A:
+client_id     = ""
+client_secret = ""
 
+# ------------------------------------------------------------
+# MODE B — Service Principal OAuth M2M (recommended for CI/CD)
+# Uncomment this block and comment out Mode A above.
+# ------------------------------------------------------------
+# auth_type     = "service_principal"
+# databricks_token = ""                           # leave empty
+# client_id     = "e4f520d6-f2e0-42a2-b743-<REST_OF_APP_ID>"
+# client_secret = "<YOUR_CLIENT_SECRET>"          # never commit the real value!
+
+# ============================================================
+# WORKSPACE
+# ============================================================
+databricks_host = "https://dbc-bd6bd71d-fa92.cloud.databricks.com"
+
+# Numeric workspace ID — the 'o=' parameter from the workspace URL
+workspace_id = 3905551482944124
+
+# ============================================================
+# SERVICE PRINCIPAL PROVISIONING
+# Set application_id to register the SP in the workspace.
+# After the SP is created you can switch to Mode B above.
+# ============================================================
+service_principal_application_id = "e4f520d6-f2e0-42a2-b743-<REST_OF_APP_ID>"
+service_principal_display_name   = "testing"
+service_principal_create_token   = false   # set true only for legacy tooling
+
+# ============================================================
+# ENVIRONMENT & COMPUTE
+# ============================================================
 environment                = "dev"
 unity_catalog_metastore_id = ""   # leave empty to auto-create a metastore
 
@@ -12,14 +53,11 @@ cloud_type        = "aws"
 default_node_type = "i3.xlarge"
 spark_version     = "14.3.x-scala2.12"
 
-# Replace with an S3 bucket you own that the Databricks IAM role can access
+# Replace with an S3 bucket your Databricks IAM role can access
 storage_root = "s3://my-databricks-unity-bucket/metastore"
 
 admin_group_name   = "admins"
 notification_email = "ops@example.com"
 
-# Numeric workspace ID — the 'o=' parameter from the workspace URL
-workspace_id = 3905551482944124
-
-# ARN of the AWS IAM role that Databricks uses to access the storage_root bucket
+# ARN of the AWS IAM role used as the Unity Catalog storage credential
 storage_credential_iam_role_arn = "arn:aws:iam::YOUR_ACCOUNT_ID:role/DatabricksStorageRole"

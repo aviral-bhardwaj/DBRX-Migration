@@ -1,17 +1,73 @@
 # variables.tf (root)
 # All top-level input variables for the Databricks workspace deployment.
 
+# ---------------------------------------------------------------------------
+# Workspace connection
+# ---------------------------------------------------------------------------
 variable "databricks_host" {
   description = "The URL of the Databricks workspace (e.g. https://dbc-xxxx.cloud.databricks.com)."
   type        = string
 }
 
+# ---------------------------------------------------------------------------
+# Authentication — choose ONE mode:
+#   Mode A: set databricks_token, leave client_id/client_secret empty
+#   Mode B: set client_id + client_secret, leave databricks_token empty
+# ---------------------------------------------------------------------------
 variable "databricks_token" {
-  description = "A personal access token (PAT) or service-principal OAuth token for the workspace."
+  description = "Personal access token (PAT) for Mode A authentication. Leave empty when using service-principal OAuth."
   type        = string
   sensitive   = true
+  default     = ""
 }
 
+variable "client_id" {
+  description = "Service-principal Application (Client) ID for Mode B OAuth M2M authentication."
+  type        = string
+  default     = ""
+}
+
+variable "client_secret" {
+  description = "Service-principal client secret for Mode B OAuth M2M authentication."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "auth_type" {
+  description = "Informational label for which auth mode is active: pat | service_principal."
+  type        = string
+  default     = "pat"
+  validation {
+    condition     = contains(["pat", "service_principal"], var.auth_type)
+    error_message = "auth_type must be 'pat' or 'service_principal'."
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Service principal provisioning
+# ---------------------------------------------------------------------------
+variable "service_principal_application_id" {
+  description = "Application (Client) ID of the service principal to register in the workspace. Same value as client_id."
+  type        = string
+  default     = ""
+}
+
+variable "service_principal_display_name" {
+  description = "Display name for the service principal in the Databricks workspace."
+  type        = string
+  default     = "terraform-sp"
+}
+
+variable "service_principal_create_token" {
+  description = "Set to true to generate an OBO (on-behalf-of) token for the service principal."
+  type        = bool
+  default     = false
+}
+
+# ---------------------------------------------------------------------------
+# Environment & compute
+# ---------------------------------------------------------------------------
 variable "environment" {
   description = "Deployment environment label: dev | staging | prod."
   type        = string

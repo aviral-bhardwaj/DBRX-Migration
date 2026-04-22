@@ -4,6 +4,8 @@ A production-ready **Terraform** project that provisions every major asset in an
 
 > **Target workspace:** `https://dbc-bd6bd71d-fa92.cloud.databricks.com` (workspace ID `3905551482944124`)
 
+📖 **Full usage guide (VS Code + CLI + CI/CD):** [docs/USAGE_GUIDE.md](docs/USAGE_GUIDE.md)
+
 ---
 
 ## Table of Contents
@@ -73,13 +75,21 @@ AWS Databricks Workspace
 
 ## Authentication
 
-Create a **Personal Access Token** (PAT) in the Databricks workspace:
+Two authentication modes are supported — set **exactly one**:
 
-1. Navigate to **Settings → Developer → Access Tokens**.
-2. Click **Generate New Token** and copy the value.
-3. Store it securely — you will pass it as the `databricks_token` variable.
+### Mode A — Personal Access Token (interactive/developer use)
 
-> For production, prefer **service-principal OAuth tokens** over PATs. Configure the provider with `client_id` / `client_secret` instead.
+1. Navigate to **Settings → Developer → Access Tokens** in the workspace.
+2. Click **Generate New Token**, copy the value.
+3. In `terraform.tfvars` set `auth_type = "pat"` and `databricks_token = "dapi..."`.
+
+### Mode B — Service Principal OAuth M2M (CI/CD / automation)
+
+1. Go to **Settings → Identity & Access → Service Principals** → select your SP.
+2. Click **Generate Secret**, copy the secret.
+3. In `terraform.tfvars` set `auth_type = "service_principal"`, `client_id`, and `client_secret`.
+
+> 📖 Full step-by-step instructions: [docs/USAGE_GUIDE.md → Authentication Methods](docs/USAGE_GUIDE.md#authentication-methods)
 
 ---
 
@@ -137,6 +147,7 @@ terraform apply -auto-approve
 | `modules/dlt_pipeline` | Delta Live Tables pipeline (triggered, development mode) |
 | `modules/dashboards` | Lakeview dashboard wired to the serverless warehouse |
 | `modules/permissions` | Group-based ACLs for clusters, jobs, notebooks, and warehouses |
+| `modules/service_principal` | Registers a service principal for OAuth M2M auth, adds it to a group |
 
 ---
 
@@ -145,7 +156,13 @@ terraform apply -auto-approve
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
 | `databricks_host` | `string` | — | Workspace URL |
-| `databricks_token` | `string` | — | PAT or OAuth token (sensitive) |
+| `auth_type` | `string` | `pat` | `pat` or `service_principal` |
+| `databricks_token` | `string` | `""` | PAT (Mode A) — leave empty for Mode B |
+| `client_id` | `string` | `""` | Service-principal Application ID (Mode B) |
+| `client_secret` | `string` | `""` | Service-principal secret (Mode B, sensitive) |
+| `service_principal_application_id` | `string` | `""` | App ID to register in workspace |
+| `service_principal_display_name` | `string` | `terraform-sp` | SP display name |
+| `service_principal_create_token` | `bool` | `false` | Generate OBO token for SP |
 | `environment` | `string` | `dev` | Deployment environment label |
 | `unity_catalog_metastore_id` | `string` | `""` | Existing metastore ID; empty = create new |
 | `cloud_type` | `string` | `aws` | Cloud provider (`aws` \| `azure` \| `gcp`) |
