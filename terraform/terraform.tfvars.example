@@ -1,0 +1,25 @@
+# terraform.tfvars.example
+# Copy this file to terraform.tfvars, fill in real values, and keep it out of source
+# control (it is listed in .gitignore).
+
+databricks_host  = "https://dbc-bd6bd71d-fa92.cloud.databricks.com"
+databricks_token = "dapi<YOUR_PERSONAL_ACCESS_TOKEN>"
+
+environment                = "dev"
+unity_catalog_metastore_id = ""   # leave empty to auto-create a metastore
+
+cloud_type        = "aws"
+default_node_type = "i3.xlarge"
+spark_version     = "14.3.x-scala2.12"
+
+# Replace with an S3 bucket you own that the Databricks IAM role can access
+storage_root = "s3://my-databricks-unity-bucket/metastore"
+
+admin_group_name   = "admins"
+notification_email = "ops@example.com"
+
+# Numeric workspace ID — the 'o=' parameter from the workspace URL
+workspace_id = 3905551482944124
+
+# ARN of the AWS IAM role that Databricks uses to access the storage_root bucket
+storage_credential_iam_role_arn = "arn:aws:iam::YOUR_ACCOUNT_ID:role/DatabricksStorageRole"
