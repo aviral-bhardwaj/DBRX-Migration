@@ -1,0 +1,11 @@
+# Terraform state and secrets — never commit these
+terraform/terraform.tfvars
+terraform/.terraform/
+# Note: .terraform.lock.hcl should be committed for reproducibility (it is NOT listed here)
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfplan
+
+# OS noise
+.DS_Store
+Thumbs.db
